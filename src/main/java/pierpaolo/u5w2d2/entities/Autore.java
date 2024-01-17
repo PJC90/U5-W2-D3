@@ -1,5 +1,6 @@
 package pierpaolo.u5w2d2.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,5 +22,7 @@ public class Autore {
     private String email;
     private LocalDate dataDiNascita;
     private String avatar;
-
+    @OneToMany(mappedBy = "autore")
+    @JsonIgnore
+    private List<Post> post;
 }
