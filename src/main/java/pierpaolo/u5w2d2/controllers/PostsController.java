@@ -1,6 +1,7 @@
 package pierpaolo.u5w2d2.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import pierpaolo.u5w2d2.entities.Post;
@@ -22,7 +23,11 @@ public class PostsController {
 //        }
 //    }
     @GetMapping
-    public List<Post> getPosts(){return postService.getPosts();}
+    public Page<Post> getPosts(@RequestParam(defaultValue = "0") int page,
+                               @RequestParam(defaultValue = "10") int size,
+                               @RequestParam(defaultValue = "id") String orderBy){
+        return postService.getPosts(page, size, orderBy);
+    }
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Post savepost(@RequestBody Post body, @RequestParam long id){return postService.save(body, id);}
