@@ -1,12 +1,17 @@
 package pierpaolo.u5w2d2.services;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import pierpaolo.u5w2d2.entities.Autore;
 import pierpaolo.u5w2d2.entities.Post;
+import pierpaolo.u5w2d2.exceptions.BadRequestException;
 import pierpaolo.u5w2d2.exceptions.NotFoundException;
+import pierpaolo.u5w2d2.repositories.AutoreDAO;
+import pierpaolo.u5w2d2.repositories.PostDAO;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -15,60 +20,46 @@ import java.util.Random;
 
 @Service
 public class PostService {
-    private List<Post> posts = new ArrayList<>();
-    public List<Post> getPosts(){ return this.posts;}
-    public List<Post> getPostsByCategory(String category){
-        List<Post> filteredList = new ArrayList<>();
-        for(Post post : posts){
-            if(post.getCategoria().equals(category)){
-                filteredList.add(post);
-            }
-        }
-        return filteredList;}
-    public Post save(Post body){
-        Random rm = new Random();
-        body.setId(rm.nextInt(1,100));
-        this.posts.add(body);
-        return body;
+    @Autowired
+    private PostDAO postDAO;
+    @Autowired
+    private AutoreDAO autoreDAO;
+
+    public List<Post> getPosts(){ return this.postDAO.findAll();}
+
+    public Post save(Post body, long id){
+        Autore found = autoreDAO.findById(id).orElseThrow(()->new NotFoundException(id));
+        body.setAutore(found);
+        postDAO.findByTitolo(body.getTitolo()).ifPresent(post -> {throw new BadRequestException("Titolo " + post.getTitolo() + " già in uso!");});
+         return postDAO.save(body);
     }
-    public Post findById(int id){
-        Post found = null;
-        for (Post post : this.posts){
-            if(post.getId() == id){
-                found = post;
-            }
-        }
-        if(found == null)
-            throw new NotFoundException(id);
-        return found;
+    public Post findById(long id){
+        return postDAO.findById(id).orElseThrow(()->new NotFoundException(id));
     }
 
-    public Post findByIdAndUpdate(int id, Post body){
-        Post found = null;
-        for(Post post: this.posts){
-            if(post.getId() == id){
-                found = post;
-                found.setId(id);
-                found.setCategoria(body.getCategoria());
-                found.setContenuto(body.getContenuto());
-                found.setTitolo(body.getTitolo());
-                found.setCover(body.getCover());
-                found.setTempoDiLettura(body.getTempoDiLettura());
-            }
-        }
-        if(found == null)
-            throw new NotFoundException(id);
-        return found;
+    public Post findByIdAndUpdate(long id, Post body){
+        Post found = this.findById(id);
+        found.setCategoria(body.getCategoria());
+        found.setTitolo(body.getTitolo());
+        found.setCover(body.getCover());
+        found.setContenuto(body.getContenuto());
+        found.setTempoDiLettura(body.getTempoDiLettura());
+        return postDAO.save(found);
     }
 
 
     public void findByIdAndDelete(int id){
-        Iterator<Post> iterator = this.posts.iterator();
-        while (iterator.hasNext()){
-            Post current = iterator.next();
-            if(current.getId() == id){
-                iterator.remove();
-            }
-        }
+        Post found = this.findById(id);
+        postDAO.delete(found);
     }
+
+    //    public List<Post> getPostsByCategory(String category){
+//        List<Post> filteredList = new ArrayList<>();
+//        for(Post post : postDAO){
+//            if(post.getCategoria().equals(category)){
+//                filteredList.add(post);
+//            }
+//        }
+//        return filteredList;
+//    }
 }
