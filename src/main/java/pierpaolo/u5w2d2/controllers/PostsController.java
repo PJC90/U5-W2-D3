@@ -23,12 +23,19 @@ public class PostsController {
 //        }
 //    }
     @GetMapping
-    public Page<Post> getPosts(@RequestParam(defaultValue = "0") int page,
+    public Page<Post> getPosts(@RequestParam(required = false) String category,
+                                @RequestParam(defaultValue = "0") int page,
                                @RequestParam(defaultValue = "10") int size,
                                @RequestParam(defaultValue = "id") String orderBy){
         // per provare se funziona Error 500 Internal Server Error
 //        throw new RuntimeException("Boooooooooooooo*******************************************************ooooooooooooom");
-        return postService.getPosts(page, size, orderBy);
+
+       if (category != null){
+           return postService.getPostsByCategory(category, page, size, orderBy);
+       }else{
+           return postService.getPosts(page, size, orderBy);
+
+       }
     }
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

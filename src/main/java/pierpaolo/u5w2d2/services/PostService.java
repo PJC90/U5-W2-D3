@@ -34,6 +34,10 @@ public class PostService {
         Pageable pageable =  PageRequest.of(page, size, Sort.by(orderBy));
         return this.postDAO.findAll(pageable);
     }
+    public Page<Post> getPostsByCategory(String category, int page, int size, String orderBy){
+        Pageable pageable = PageRequest.of(page,size, Sort.by(orderBy));
+        return this.postDAO.findByCategoria(category, pageable);
+    }
 
     public Post save(Post body, long id){
         Autore found = autoreDAO.findById(id).orElseThrow(()->new NotFoundException(id));
@@ -61,13 +65,5 @@ public class PostService {
         postDAO.delete(found);
     }
 
-    //    public List<Post> getPostsByCategory(String category){
-//        List<Post> filteredList = new ArrayList<>();
-//        for(Post post : postDAO){
-//            if(post.getCategoria().equals(category)){
-//                filteredList.add(post);
-//            }
-//        }
-//        return filteredList;
-//    }
+
 }

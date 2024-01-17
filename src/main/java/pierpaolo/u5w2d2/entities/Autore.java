@@ -23,6 +23,6 @@ public class Autore {
     private LocalDate dataDiNascita;
     private String avatar;
     @OneToMany(mappedBy = "autore")
-    @JsonIgnore
+    @JsonIgnore     //nel file JSON viene ignorato post perchè potrebbe essere pericoloso
     private List<Post> post;
 }
